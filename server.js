@@ -2,6 +2,7 @@
 
 // app dependiencies
 const express = require('express');
+const superagent = require('superagent');
 const cors = require('cors');
 
 // get proect enviroment variables
@@ -17,16 +18,17 @@ app.use(cors());
 
 // -------------------------LOCATION-------------------------
 //Referencing the data from the json files that will include longitude and latitude
-function Location(data) {
-  this.formatted_query = data.formatted_address;
-  this.latitude = data.geometry.location.lat;
-  this.longitude = data.geometry.location.lng;
+function Location(query, res) {
+  this.formatted_query = res.body.results[0].formatted_address;
+  this.latitude = res.body.results[0].geometry.location.lat;
+  this.longitude = res.body.results[0].geometry.location.lng;
+  this.search_query = query;
 }
 app.get('/location', (req, res) => {
   // console.log('my request object: ', req);
-  const locationData = searchToLatLng(req.query.data);
-  //the server will send location data to the client
-  res.send(locationData);
+  searchToLatLng(req.query.data)
+    .then(location => res.send(location))
+    .catch(error => handleError(error,res));
 });
 
 // helper function
@@ -37,15 +39,12 @@ function searchToLatLng(query) {
   return location;
 }
 // -------------------------WEATHER-------------------------
-function Weather(data) {
-  this.forecast = data.daily.summary;
-  this.time = data.currently.time;
+function Weather(day) {
+  this.forecast = day.summary;
+  this.time = new Date(day.time * 1000).toDateString();
 }
-app.get('/weather', (req, res) => {
-  // console.log('my request object: ', req);
-  const weatherData = searchWeather(req.query.data);
-  res.send(weatherData);
-});
+app.get('/weather', getWeather);
+
 // helper function
 function searchWeather(query) {
   const weatherData = require('./data/weather.json');
