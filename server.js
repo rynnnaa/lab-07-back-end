@@ -1,12 +1,12 @@
-'use strict';
+"use strict";
 
 // app dependiencies
-const express = require('express');
-const superagent = require('superagent');
-const cors = require('cors');
+const express = require("express");
+const superagent = require("superagent");
+const cors = require("cors");
 
 // get proect enviroment variables
-require('dotenv').config();
+require("dotenv").config();
 
 // app constants
 const PORT = process.env.PORT || 3000;
@@ -24,38 +24,54 @@ function Location(query, res) {
   this.longitude = res.body.results[0].geometry.location.lng;
   this.search_query = query;
 }
-app.get('/location', (req, res) => {
+app.get("/location", (req, res) => {
   // console.log('my request object: ', req);
   searchToLatLng(req.query.data)
     .then(location => res.send(location))
-    .catch(error => handleError(error,res));
+    .catch(error => handleError(error, res));
 });
 
 // helper function
 function searchToLatLng(query) {
-  const geoData = require('./data/geo.json');
-  const location = new Location(geoData.results[0]);
-  location.search_query = query;
-  return location;
+  // put url here
+  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${query}&key=${
+    process.env.GEOCODE_API_KEY
+  }`;
+  return superagent
+    .get(url)
+    .then(res => {
+      return new Location(query, res);
+    })
+    .catch(error => handleError(error));
 }
+
 // -------------------------WEATHER-------------------------
 function Weather(day) {
   this.forecast = day.summary;
   this.time = new Date(day.time * 1000).toDateString();
 }
-app.get('/weather', getWeather);
+app.get("/weather", getWeather);
 
 // helper function
-function searchWeather(query) {
-  const weatherData = require('./data/weather.json');
-  const weather = new Weather(weatherData);
-  weather.search_query = query;
-  return weather;
+function getWeather(req, res) {
+  const url = `https://api.darksky.net/forecast/${
+    process.env.WEATHER_API_KEY
+  }/${req.query.data.latitude},${req.query.data.longitude}`;
+  superagent
+    .get(url)
+    .then(result => {
+      const weatherSummaries = result.body.daily.data.map(day => {
+        return new Weather(day);
+      });
+      res.send(weatherSummaries);
+    })
+    .catch(error => handleError(error));
 }
+
 // the client will recieve an error message upon status error 500
 function handleError(err, res) {
   console.error(err);
-  if (res) res.satus(500).send('Sorry, something broke');
+  if (res) res.satus(500).send("Sorry, something broke");
 }
 
 app.listen(PORT, () => {
