@@ -1,15 +1,16 @@
-"use strict";
+/* eslint-disable no-undef */
+'use strict';
 
 // app dependiencies
-const express = require("express");
-const superagent = require("superagent");
-const cors = require("cors");
+const express = require('express');
+const superagent = require('superagent');
+const cors = require('cors');
 
 // get proect enviroment variables
-require("dotenv").config();
+require('dotenv').config();
 
 // app constants
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 const app = express();
 
 // app middleware
@@ -24,7 +25,7 @@ function Location(query, res) {
   this.longitude = res.body.results[0].geometry.location.lng;
   this.search_query = query;
 }
-app.get("/location", (req, res) => {
+app.get('/location', (req, res) => {
   // console.log('my request object: ', req);
   searchToLatLng(req.query.data)
     .then(location => res.send(location))
@@ -34,9 +35,7 @@ app.get("/location", (req, res) => {
 // helper function
 function searchToLatLng(query) {
   // put url here
-  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${query}&key=${
-    process.env.GEOCODE_API_KEY
-  }`;
+  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${query}&key=${process.env.GEOCODE_API_KEY}`;
   return superagent
     .get(url)
     .then(res => {
@@ -50,13 +49,11 @@ function Weather(day) {
   this.forecast = day.summary;
   this.time = new Date(day.time * 1000).toDateString();
 }
-app.get("/weather", getWeather);
+app.get('/weather', getWeather);
 
 // helper function
 function getWeather(req, res) {
-  const url = `https://api.darksky.net/forecast/${
-    process.env.WEATHER_API_KEY
-  }/${req.query.data.latitude},${req.query.data.longitude}`;
+  const url = `https://api.darksky.net/forecast/${process.env.WEATHER_API_KEY}/${req.query.data.latitude},${req.query.data.longitude}`;
   superagent
     .get(url)
     .then(result => {
@@ -71,7 +68,7 @@ function getWeather(req, res) {
 // the client will recieve an error message upon status error 500
 function handleError(err, res) {
   console.error(err);
-  if (res) res.satus(500).send("Sorry, something broke");
+  if (res) res.satus(500).send('Sorry, something broke');
 }
 
 app.listen(PORT, () => {
