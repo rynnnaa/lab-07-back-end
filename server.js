@@ -53,6 +53,7 @@ function searchWeather(query) {
   weather.search_query = query;
   return weather;
 }
+// the client will recieve an error message upon status error 500
 function handleError(err, res) {
   console.error(err);
   if (res) res.satus(500).send('Sorry, something broke');
