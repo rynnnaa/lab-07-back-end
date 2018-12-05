@@ -25,6 +25,7 @@ function Location(data) {
 app.get('/location', (req, res) => {
   // console.log('my request object: ', req);
   const locationData = searchToLatLng(req.query.data);
+  //the server will send location data to the client
   res.send(locationData);
 });
 
