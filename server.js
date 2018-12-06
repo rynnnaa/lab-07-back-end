@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 'use strict';
 
 // app dependiencies
@@ -15,7 +14,6 @@ const app = express();
 
 // app middleware
 app.use(cors());
-// app.use(express.static('./'));
 
 // -------------------------LOCATION-------------------------
 //Referencing the data from the json files that will include longitude and latitude
@@ -34,9 +32,8 @@ app.get('/location', (req, res) => {
 
 // helper function
 function searchToLatLng(query) {
-  // put url here
-  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=seattle&key=AIzaSyAW9SrPliM05Tb1JqVffpSML_LeutUVyAQ`;
-  return superagent
+  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${query}&key=${process.env.GEOCODE_API_KEY}`; return superagent
+  //return superagent.get(url) compare line below
     .get(url)
     .then(res => {
       return new Location(query, res);
@@ -64,7 +61,7 @@ function getWeather(req, res) {
     .catch(error => handleError(error));
 }
 
-// // the client will recieve an error message upon status error 500
+// the client will recieve an error message upon status error 500
 function handleError(err, res) {
   console.error(err);
   if (res) res.satus(500).send('Sorry, something broke');
@@ -75,33 +72,49 @@ app.listen(PORT, () => {
 });
 
 // -------------------------YELP-------------------------
-// function Review(value) {
-//   this.name = value.name;
-//   this.price = value.price;
-//   this.rating = value.rating;
-// }
-// app.get('/yelp', getReview);
+function Yelp(items) {
+  this.name = items.name;
+  this.url = items.url;
+  this.image_url = items.image_url;
+  this.rating = items.rating;
+  this.price = items.price;
+}
+app.get('/yelp', getReview);
 
-// // helper function
-// function getReview(req, res) {
-//   const url = `https://api.yelp.com/v3/businesses/search?location=${request.query.data.latitude},${request.query.data.longitude}`;
-//   superagent.get(url)
-//     .set('Authorization', `Bearer ${process.env.YELP_API_KEY}`)
-//     .then(result => {
-//       const reviewSummaries = result.body.business.map(value => {
-//         return new Review(value);
-//       });
-//       res.send(reviewSummaries);
-//     })
-//     .catch(error => handleError(error, res));
-// }
+// helper function
+function getReview(req, res) {
+  const url = `https://api.yelp.com/v3/businesses/search?location=${req.query.data.search_query}/${req.query.data.latitude},${req.query.data.longitude}`
+  superagent.get(url)
+    .set('Authorization', `Bearer ${process.env.YELP_API_KEY}`)
+    .then(result => {
+      const getReview = result.body.items.map(item => {
+        return new Yelp(item);
+      });
+      res.send(getReview);
+    })
+    .catch(error => handleError(error));
+}
+// -------------------------MOVIES-------------------------
+function Movie(movie) {
+  this.title= movie.title;
+  this.image_url = 'https://image.tmdb.org/t/p/w370_and_h556_bestv2/' + movie.poster_path;
+  this.overview= movie.overview;
+  this.popularity = movie.popularity;
+  this.average_votes= movie.average_votes;
+  this.total_votes = movie.total_votes;
+  this.released_on = movie.released_on;
+}
 
-// // the client will recieve an error message upon status error 500
-// function handleError(err, res) {
-//   console.error(err);
-//   if (res) res.satus(500).send('Sorry, something broke');
-// }
+app.get('/movies', getMovie)
 
-// app.listen(PORT, () => {
-//   console.log(`listening on ${PORT}`);
-// });
+function getMovie(req, res) {
+  const url = `https://api.themoviedb.org/3/search/movie?api_key=${process.env.MOVIE_API_KEY}&query=${req.query.data.search_query}`;
+  superagent.get(url)
+    .then (result => {
+      const movieSummaries = result.body.results.map(movie => {
+        return new Movie(movie);
+      });
+      res.send(movieSummaries);
+    })
+    .catch(error => handleError(error))
+}
