@@ -1,9 +1,38 @@
 # lab-07-back-end
 
-Ryna Truong && Dez Teague
+**Author**: Ryna Truong && Dez Teague
+**Version**: 1.0.0 (increment the patch/fix version number if you make more commits past your first submission)
 
-Number and name of feature: Feauture 1
-Estimate of time needed to complete:
+## Overview
+This application allows users to input their location and get results for weather, food, and activities for the selected area.
+
+## Getting Started
+In order to build this app a user must request API's and create a server file and deploy onto Heroku to get it running
+
+## Architecture
+Use of .json packages, and install dependencies such as express dotenv cors superagaent and javascript to write our code.
+
+## Change Log
+Name of feature: Consistently format
+Estimate of time needed to complete: 1 hour
 Start time: 9:45
-Finish time:
-Actual time needed to complete:
+Finish time: 11:00
+Actual time needed to complete: 1 hour 15 mins
+
+Name of feature: Retrieve Restaurant Information
+Estimate of time needed to complete: 30
+Start time: 11:00
+Finish time: 1:00
+Actual time needed to complete: 2 hours
+
+Name of feature: Retrieve movie information
+Estimate of time needed to complete: 30
+Start time: 5
+Finish time: 6
+Actual time needed to complete: 1 hour
+
+
+01-01-2001 4:59pm - Application now has a fully-functional express server, with a GET route for the location resource.
+
+## Credits and Collaborations
+Collaborated with Codefellows 
